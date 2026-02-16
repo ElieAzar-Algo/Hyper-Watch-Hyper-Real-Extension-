@@ -7,7 +7,7 @@ A web dashboard that transforms Hyper-Reach from a reactive notification tool in
 - **Real-Time Threat Monitoring**: Aggregates data from multiple sources:
   - National Weather Service (NWS) - Weather alerts
   - USGS - Earthquake data
-  - Power Outage monitoring (simulated for demo)
+  - EPA AirNow - Air quality (AQI) alerts (real API; optional key)
 
 - **Interactive Map Dashboard**: 
   - Color-coded threat markers by severity
@@ -54,9 +54,12 @@ Create a `.env.local` file in the project root:
 ```env
 # Optional - enables AI-powered message drafting
 OPENAI_API_KEY=sk-your-openai-api-key-here
+
+# Optional - enables air quality alerts (free key at https://www.airnowapi.org/)
+AIRNOW_API_KEY=
 ```
 
-Without an OpenAI API key, the app will use intelligent default messages based on threat type and severity.
+Without an OpenAI API key, the app will use intelligent default messages based on threat type and severity. Without an AirNow API key, air quality alerts are omitted.
 
 ## Demo Script
 
@@ -108,7 +111,7 @@ threat-monitor/
 |--------|------|-----|
 | NWS | Weather alerts | https://api.weather.gov |
 | USGS | Earthquakes | https://earthquake.usgs.gov |
-| Power Outages | Simulated | Internal |
+| EPA AirNow | Air quality (AQI) | https://www.airnowapi.org/ |
 
 ## Business Value
 

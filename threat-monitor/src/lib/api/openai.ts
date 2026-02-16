@@ -155,8 +155,8 @@ function getDefaultMessage(threat: Threat): string {
       return `${threat.severity.toUpperCase()}: ${threat.type} for ${location}. Monitor local news for updates. Stay safe.`;
     case 'usgs':
       return `EARTHQUAKE ALERT: M${threat.magnitude?.toFixed(1) || '?'} earthquake reported near ${location}. Check for damage. Be prepared for aftershocks.`;
-    case 'outage':
-      return `POWER OUTAGE: ${threat.affectedCustomers?.toLocaleString() || 'Multiple'} customers affected in ${location}. Crews working to restore power.`;
+    case 'airquality':
+      return `AIR QUALITY ALERT: AQI ${threat.aqi ?? 'elevated'} in ${location}. Limit outdoor exposure. Check air quality updates.`;
     default:
       return `ALERT: ${threat.type} in ${location}. Follow official guidance.`;
   }
@@ -185,13 +185,13 @@ function getDefaultAudiences(threat: Threat): string[] {
         'Search and rescue teams',
         'Hospital emergency departments',
       ];
-    case 'outage':
+    case 'airquality':
       return [
         ...base,
-        'Medical equipment users',
-        'Businesses in affected area',
-        'Traffic management',
-        'Critical infrastructure operators',
+        'Schools and outdoor facilities',
+        'Healthcare facilities',
+        'Outdoor workers',
+        'Sensitive groups (respiratory, elderly)',
       ];
     default:
       return base;

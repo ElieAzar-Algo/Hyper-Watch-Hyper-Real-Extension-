@@ -2,14 +2,13 @@
 
 import type { Threat } from '@/lib/types';
 import { Card, Badge } from '@/components/ui';
-import { cn, formatRelativeTime, formatCustomers, formatMagnitude } from '@/lib/utils';
+import { cn, formatRelativeTime, formatMagnitude } from '@/lib/utils';
 import {
   CloudLightning,
   Activity,
-  Zap,
+  Wind,
   MapPin,
   Clock,
-  Users,
 } from 'lucide-react';
 
 interface ThreatCardProps {
@@ -21,13 +20,13 @@ interface ThreatCardProps {
 const sourceIcons = {
   nws: CloudLightning,
   usgs: Activity,
-  outage: Zap,
+  airquality: Wind,
 };
 
 const sourceLabels = {
   nws: 'Weather',
   usgs: 'Earthquake',
-  outage: 'Power',
+  airquality: 'Air',
 };
 
 export function ThreatCard({ threat, isSelected, onClick }: ThreatCardProps) {
@@ -51,7 +50,7 @@ export function ThreatCard({ threat, isSelected, onClick }: ThreatCardProps) {
             'flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center',
             threat.source === 'nws' && 'bg-sky-100 text-sky-600',
             threat.source === 'usgs' && 'bg-orange-100 text-orange-600',
-            threat.source === 'outage' && 'bg-violet-100 text-violet-600'
+            threat.source === 'airquality' && 'bg-teal-100 text-teal-600'
           )}
         >
           <SourceIcon className="w-5 h-5" />
@@ -94,11 +93,10 @@ export function ThreatCard({ threat, isSelected, onClick }: ThreatCardProps) {
               </span>
             )}
 
-            {/* Show affected customers for outages */}
-            {threat.affectedCustomers && (
-              <span className="flex items-center gap-1">
-                <Users className="w-3 h-3" />
-                {formatCustomers(threat.affectedCustomers)}
+            {/* Show AQI for air quality */}
+            {threat.aqi != null && (
+              <span className="font-medium text-teal-600">
+                AQI {threat.aqi}
               </span>
             )}
           </div>
