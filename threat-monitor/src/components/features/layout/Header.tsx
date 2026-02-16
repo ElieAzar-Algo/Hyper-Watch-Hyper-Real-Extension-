@@ -31,7 +31,7 @@ export function Header({
           </div>
           <div>
             <h1 className="font-bold text-xl text-gray-900">
-              Threat Monitor
+              Hyper Watch
             </h1>
             <p className="text-xs text-gray-500">
               Powered by Hyper-Reach

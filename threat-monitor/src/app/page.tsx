@@ -127,7 +127,7 @@ export default function HomePage() {
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Alert Sent to Hyper-Reach!
+                Alert Sent to Hyper Watch!
               </h2>
               <p className="text-gray-600 mb-6">
                 Your alert has been queued for delivery to {sentDraft.audiences.length} audience segments
@@ -154,7 +154,7 @@ export default function HomePage() {
               </Button>
 
               <p className="text-xs text-gray-400 mt-4">
-                This is a demo. In production, this would trigger actual Hyper-Reach notifications.
+                This is a demo. In production, this would trigger actual Hyper Watch notifications.
               </p>
             </div>
           </Card>

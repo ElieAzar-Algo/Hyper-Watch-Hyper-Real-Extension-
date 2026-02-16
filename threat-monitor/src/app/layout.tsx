@@ -8,7 +8,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Threat Monitor - Hyper-Reach",
+  title: "Hyper Watch",
   description: "Real-time threat monitoring and AI-powered alert drafting for emergency management",
   keywords: ["emergency management", "threat monitoring", "mass notification", "Hyper-Reach"],
 };

@@ -280,7 +280,7 @@ export function DraftPanel({ threat, onSend }: DraftPanelProps) {
             disabled={selectedChannels.length === 0 || selectedAudiences.length === 0}
           >
             <Send className="w-4 h-4 mr-2" />
-            Send to Hyper-Reach
+            Send to Hyper Watch
           </Button>
           <p className="text-xs text-gray-500 text-center mt-2">
             {selectedAudiences.length} segments • {selectedChannels.length} channels
