@@ -1,3 +1,8 @@
+---
+description: Tailwind and CSS styling conventions
+globs: ["**/*.tsx", "**/*.css"]
+---
+
 # Styling Consistency
 
 ## Dual Approach: Tailwind Config + CSS Variables

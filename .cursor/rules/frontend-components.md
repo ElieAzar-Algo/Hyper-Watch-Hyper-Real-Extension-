@@ -1,3 +1,8 @@
+---
+description: Frontend component structure and placement
+globs: ["**/components/**", "**/app/**/*.tsx"]
+---
+
 # Frontend Component Architecture
 
 ## Folder Structure

@@ -1,3 +1,8 @@
+---
+description: Backend and API patterns for lib/ and app/api/
+globs: ["**/lib/**", "**/app/api/**"]
+---
+
 # Backend Patterns - Reusable Utilities
 
 ## Folder Structure

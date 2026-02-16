@@ -16,6 +16,15 @@ Hyper-Reach operates in the emergency mass notification and crisis communication
 
 **Outcome:** This turns Hyper-Reach from a tool you use after you know about a problem into one that helps you find problems early.
 
+## Domain terms
+
+Use these terms consistently in code, copy, and UI:
+
+- **Threat** – An event from monitored sources (NWS, USGS, etc.) that may require an alert.
+- **Draft** – AI-generated alert message and suggested audiences/channels; user can edit before sending.
+- **Hyper Watch** – Product name for this Real-Time Threat Monitor UI.
+- **Hyper-Reach** – The underlying mass-notification platform; use in taglines like "Powered by Hyper-Reach".
+
 ## Where to look
 
 - **Coding standards and patterns:** [.cursor/rules/README.md](.cursor/rules/README.md)
@@ -26,3 +35,8 @@ Hyper-Reach operates in the emergency mass notification and crisis communication
 - Read the rules README before adding or refactoring code.
 - Reuse existing utilities and components (e.g. `lib/api/fetch.ts`, `errorResponse()` from `lib/utils/errors`, UI from `components/ui`).
 - When adding data sources or features, follow existing patterns: API clients in `lib/api/`, feature components in `components/features/`. API routes should use `errorResponse()` from `lib/utils/errors` for consistent error handling.
+
+## Out of scope
+
+- This app does not implement user auth or real Hyper-Reach API integration (demo/mock only).
+- Do not add features outside the Threat Monitor (e.g. other Hyper-Reach products) unless the user asks.
