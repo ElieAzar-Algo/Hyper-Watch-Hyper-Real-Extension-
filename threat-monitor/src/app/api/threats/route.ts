@@ -1,6 +1,6 @@
 /**
  * GET /api/threats
- * Fetches threats from all sources (NWS, USGS, Power Outages)
+ * Fetches threats from all sources (NWS, USGS, Air Quality)
  * Query params:
  *   - state: US state code (e.g., "CA", "TX")
  *   - sources: Comma-separated list of sources to include (default: all)
@@ -9,7 +9,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchNWSAlerts } from '@/lib/api/nws';
 import { fetchUSGSEarthquakes } from '@/lib/api/usgs';
-import { fetchPowerOutages } from '@/lib/api/poweroutage';
+import { fetchAirQualityAlerts } from '@/lib/api/airquality';
 import { sortBySeverity } from '@/lib/utils/transform';
 import type { Threat, ThreatsResponse, ThreatSource } from '@/lib/types';
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   // Parse which sources to fetch
   const sources: ThreatSource[] = sourcesParam
     ? (sourcesParam.split(',') as ThreatSource[])
-    : ['nws', 'usgs', 'outage'];
+    : ['nws', 'usgs', 'airquality'];
 
   const errors: string[] = [];
   const allThreats: Threat[] = [];
@@ -50,10 +50,10 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  if (sources.includes('outage')) {
+  if (sources.includes('airquality')) {
     fetchPromises.push(
-      fetchPowerOutages(state).catch((err) => {
-        errors.push(`Power Outage: ${err.message}`);
+      fetchAirQualityAlerts(state).catch((err) => {
+        errors.push(`Air Quality: ${err.message}`);
         return [];
       })
     );

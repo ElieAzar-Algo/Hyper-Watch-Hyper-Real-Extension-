@@ -13,7 +13,7 @@ const severityStyles: Record<Severity, string> = {
 const sourceStyles: Record<ThreatSource, string> = {
   nws: 'bg-sky-500 text-white',
   usgs: 'bg-orange-500 text-white',
-  outage: 'bg-violet-500 text-white',
+  airquality: 'bg-teal-500 text-white',
 };
 
 const sizeStyles = {

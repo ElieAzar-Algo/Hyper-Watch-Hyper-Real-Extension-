@@ -15,12 +15,12 @@ interface ThreatListProps {
 }
 
 const severities: Severity[] = ['critical', 'warning', 'watch', 'advisory'];
-const sources: ThreatSource[] = ['nws', 'usgs', 'outage'];
+const sources: ThreatSource[] = ['nws', 'usgs', 'airquality'];
 
 const sourceLabels: Record<ThreatSource, string> = {
   nws: 'Weather',
   usgs: 'Earthquake',
-  outage: 'Power',
+  airquality: 'Air',
 };
 
 export function ThreatList({

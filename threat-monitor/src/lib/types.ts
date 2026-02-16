@@ -1,5 +1,5 @@
 // Threat source types
-export type ThreatSource = 'nws' | 'usgs' | 'outage';
+export type ThreatSource = 'nws' | 'usgs' | 'airquality';
 
 // Severity levels
 export type Severity = 'critical' | 'warning' | 'watch' | 'advisory';
@@ -23,8 +23,8 @@ export interface Threat {
   };
   startTime: string;
   endTime?: string;
-  affectedCustomers?: number; // For power outages
   magnitude?: number; // For earthquakes
+  aqi?: number; // For air quality
   raw?: unknown;
 }
 
@@ -104,19 +104,6 @@ export interface USGSResponse {
     count: number;
   };
   features: USGSEarthquake[];
-}
-
-// Power Outage types
-export interface PowerOutage {
-  id: string;
-  utilityName: string;
-  county: string;
-  state: string;
-  customersAffected: number;
-  lat: number;
-  lng: number;
-  reportedAt: string;
-  estimatedRestoration?: string;
 }
 
 // State codes for US states

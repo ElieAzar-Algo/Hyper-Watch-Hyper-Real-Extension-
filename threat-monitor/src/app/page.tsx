@@ -40,7 +40,7 @@ export default function HomePage() {
       { type: 'Flash Flood Warning', severity: 'warning' as Severity, source: 'nws' as const },
       { type: 'Severe Thunderstorm', severity: 'watch' as Severity, source: 'nws' as const },
       { type: 'Earthquake', severity: 'critical' as Severity, source: 'usgs' as const, magnitude: 5.2 },
-      { type: 'Power Outage', severity: 'warning' as Severity, source: 'outage' as const, customers: 15000 },
+      { type: 'Air Quality Alert', severity: 'warning' as Severity, source: 'airquality' as const, aqi: 165 },
     ];
 
     const randomType = simulatedTypes[Math.floor(Math.random() * simulatedTypes.length)];
@@ -59,7 +59,7 @@ export default function HomePage() {
       },
       startTime: new Date().toISOString(),
       magnitude: randomType.magnitude,
-      affectedCustomers: randomType.customers,
+      aqi: randomType.aqi,
     };
 
     addSimulatedThreat(simulatedThreat);
