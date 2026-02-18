@@ -28,7 +28,11 @@ This guide describes how to deploy the Real-Time Threat Monitor (Hyper Watch) to
 
 ### Railway
 
-When deploying on Railway, set the service **Root Directory** to `threat-monitor` in the service Settings. Otherwise Railpack analyzes the repo root (which has no `package.json`) and cannot determine how to build. With the root directory set, the build runs from the app folder and Node/Next.js is detected.
+Railway (Railpack) must build the app in `threat-monitor/`. You can do either of the following:
+
+1. **Set Root Directory (recommended):** In the Railway dashboard, open your service → **Settings** → **Source** (or **Build**) → set **Root Directory** to `threat-monitor`. Then Railpack will run in that folder and detect Node/Next.js.
+
+2. **Build from repo root:** The repository root contains a `package.json` that delegates `install`, `build`, and `start` to `threat-monitor/`. If you do not set Root Directory, Railpack will see this file, detect Node, and run `npm install` / `npm run build` / `npm run start` at root; those scripts install and run the app from `threat-monitor/`, so the deploy still works.
 
 ---
 

@@ -1,0 +1,10 @@
+{
+  "name": "hyper-reach-plugin-root",
+  "private": true,
+  "description": "Root workspace for Railway/builds when app lives in threat-monitor/",
+  "scripts": {
+    "install": "cd threat-monitor && npm install",
+    "build": "cd threat-monitor && npm run build",
+    "start": "cd threat-monitor && npm run start"
+  }
+}
