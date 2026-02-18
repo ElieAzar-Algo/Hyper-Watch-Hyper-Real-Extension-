@@ -1,3 +1,5 @@
+import dns from 'node:dns';
+
 /**
  * Runs once when the Next.js server starts (Node only).
  * Prefer IPv4 for outbound connections so SMTP and Twilio work from cloud runtimes
@@ -5,7 +7,6 @@
  */
 export function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
-    const dns = require('dns');
     dns.setDefaultResultOrder('ipv4first');
   }
 }
