@@ -2,18 +2,21 @@
 
 import { Select, Button } from '@/components/ui';
 import { US_STATES } from '@/lib/types';
-import { Radio, RefreshCw, AlertTriangle } from 'lucide-react';
+import Link from 'next/link';
+import { Radio, RefreshCw, AlertTriangle, ArrowLeft } from 'lucide-react';
 
 interface HeaderProps {
-  selectedState: string;
-  onStateChange: (state: string) => void;
-  onRefresh: () => void;
-  onSimulateThreat: () => void;
+  variant?: 'dashboard' | 'recipients';
+  selectedState?: string;
+  onStateChange?: (state: string) => void;
+  onRefresh?: () => void;
+  onSimulateThreat?: () => void;
   isRefreshing?: boolean;
   lastUpdated?: string;
 }
 
 export function Header({
+  variant = 'dashboard',
   selectedState,
   onStateChange,
   onRefresh,
@@ -21,62 +24,96 @@ export function Header({
   isRefreshing,
   lastUpdated,
 }: HeaderProps) {
+  const logoBlock = (
+    <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
+        <Radio className="w-5 h-5 text-white" />
+      </div>
+      <div>
+        <h1 className="font-bold text-xl text-gray-900">
+          Hyper Watch
+        </h1>
+        <p className="text-xs text-gray-500">
+          Powered by Hyper-Reach
+        </p>
+      </div>
+    </div>
+  );
+
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         {/* Logo and Title */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 bg-blue-600 rounded-lg">
-            <Radio className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="font-bold text-xl text-gray-900">
-              Hyper Watch
-            </h1>
-            <p className="text-xs text-gray-500">
-              Powered by Hyper-Reach
-            </p>
-          </div>
-        </div>
+        {variant === 'recipients' ? (
+          <Link href="/" className="hover:opacity-90 transition-opacity">
+            {logoBlock}
+          </Link>
+        ) : (
+          logoBlock
+        )}
 
         {/* Controls */}
         <div className="flex items-center gap-4">
-          {/* State Selector */}
-          <Select
-            value={selectedState}
-            onChange={(e) => onStateChange(e.target.value)}
-            className="w-40"
-          >
-            {Object.entries(US_STATES).map(([code, name]) => (
-              <option key={code} value={code}>
-                {name}
-              </option>
-            ))}
-          </Select>
+          {variant === 'recipients' ? (
+            <>
+              <Link href="/">
+                <Button variant="secondary" size="sm">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Dashboard
+                </Button>
+              </Link>
+              <span className="text-sm text-gray-600 font-medium">
+                Manage Staff
+              </span>
+            </>
+          ) : (
+            <>
+              <Link href="/recipients">
+                <Button variant="secondary" size="sm">
+                  Manage Staff
+                </Button>
+              </Link>
 
-          {/* Refresh Button */}
-          <Button
-            variant="secondary"
-            onClick={onRefresh}
-            disabled={isRefreshing}
-          >
-            <RefreshCw
-              className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
-            />
-            Refresh
-          </Button>
+              {selectedState != null && onStateChange && (
+                <Select
+                  value={selectedState}
+                  onChange={(e) => onStateChange(e.target.value)}
+                  className="w-40"
+                >
+                  {Object.entries(US_STATES).map(([code, name]) => (
+                    <option key={code} value={code}>
+                      {name}
+                    </option>
+                  ))}
+                </Select>
+              )}
 
-          {/* Simulate Threat Button */}
-          <Button variant="outline" onClick={onSimulateThreat}>
-            <AlertTriangle className="w-4 h-4 mr-2" />
-            Simulate Threat
-          </Button>
+              {onRefresh && (
+                <Button
+                  variant="secondary"
+                  onClick={onRefresh}
+                  disabled={isRefreshing}
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`}
+                  />
+                  Refresh
+                </Button>
+              )}
 
-          {/* Last Updated */}
-          {lastUpdated && (
-            <span className="text-xs text-gray-500">
-              Updated: {lastUpdated}
-            </span>
+              {onSimulateThreat && (
+                <Button variant="outline" onClick={onSimulateThreat}>
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Simulate Threat
+                </Button>
+              )}
+
+              {lastUpdated && (
+                <span className="text-xs text-gray-500">
+                  Updated: {lastUpdated}
+                </span>
+              )}
+            </>
           )}
         </div>
       </div>

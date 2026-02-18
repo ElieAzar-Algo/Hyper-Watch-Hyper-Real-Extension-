@@ -5,7 +5,7 @@ export type ThreatSource = 'nws' | 'usgs' | 'airquality';
 export type Severity = 'critical' | 'warning' | 'watch' | 'advisory';
 
 // Notification channels
-export type Channel = 'sms' | 'voice' | 'email' | 'app';
+export type Channel = 'sms' | 'email';
 
 // Main threat interface - unified format for all data sources
 export interface Threat {

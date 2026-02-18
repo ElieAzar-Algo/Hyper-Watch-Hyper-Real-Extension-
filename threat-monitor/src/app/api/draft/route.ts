@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
           'Local businesses',
           'Schools and institutions',
         ],
-        channels: ['sms', 'app', 'email'],
+        channels: ['sms', 'email'],
         note: 'Default response (OpenAI not configured)',
       });
     }
