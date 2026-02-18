@@ -5,7 +5,7 @@ import type { Threat, DraftResponse, Severity } from '@/lib/types';
 import { STATE_CENTERS } from '@/lib/types';
 import { useThreats, useCriticalAlert } from '@/lib/hooks';
 import { Header } from '@/components/features/layout';
-import { ThreatMap, ThreatList, CriticalAlertLamp, CriticalAlertModal, ThreatDetailsModal } from '@/components/features/threats';
+import { ThreatMap, ThreatList, CriticalAlertModal, ThreatDetailsModal } from '@/components/features/threats';
 import { DraftPanel } from '@/components/features/drafts';
 import { Card, Button, Spinner } from '@/components/ui';
 import { CheckCircle, X } from 'lucide-react';

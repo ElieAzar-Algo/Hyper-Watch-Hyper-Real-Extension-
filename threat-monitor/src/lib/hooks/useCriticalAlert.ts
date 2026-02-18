@@ -28,12 +28,12 @@ export function useCriticalAlert(threats: Threat[]): UseCriticalAlertReturn {
     if (hasNewCritical) {
       setHasUnacknowledgedCritical(true);
     }
-  }, [criticalIds.length, criticalIdsKey]);
+  }, [criticalIds, criticalIdsKey]);
 
   const acknowledge = useCallback(() => {
     criticalIds.forEach((id) => acknowledgedIdsRef.current.add(id));
     setHasUnacknowledgedCritical(false);
-  }, [criticalIdsKey]);
+  }, [criticalIds]);
 
   return {
     hasUnacknowledgedCritical,

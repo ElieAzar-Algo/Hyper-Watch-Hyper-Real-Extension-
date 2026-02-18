@@ -44,8 +44,8 @@ export function RecipientList() {
       }
       const data = (await res.json()) as Recipient[];
       setRecipients(data);
-    } catch (e: any) {
-      setError(e.message ?? 'Failed to load recipients');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to load recipients');
     } finally {
       setLoading(false);
     }
@@ -99,8 +99,8 @@ export function RecipientList() {
 
       await load();
       resetForm();
-    } catch (e: any) {
-      setError(e.message ?? 'Failed to save recipient');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to save recipient');
     }
   };
 
@@ -124,8 +124,8 @@ export function RecipientList() {
         throw new Error('Failed to delete recipient');
       }
       await load();
-    } catch (e: any) {
-      setError(e.message ?? 'Failed to delete recipient');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to delete recipient');
     }
   };
 
@@ -140,8 +140,8 @@ export function RecipientList() {
         throw new Error('Failed to update recipient');
       }
       await load();
-    } catch (e: any) {
-      setError(e.message ?? 'Failed to update recipient');
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Failed to update recipient');
     }
   };
 
