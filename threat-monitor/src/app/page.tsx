@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import type { Threat, DraftResponse, Severity } from '@/lib/types';
 import { STATE_CENTERS } from '@/lib/types';
-import { useThreats } from '@/lib/hooks';
+import { useThreats, useCriticalAlert } from '@/lib/hooks';
 import { Header } from '@/components/features/layout';
-import { ThreatMap, ThreatList } from '@/components/features/threats';
+import { ThreatMap, ThreatList, CriticalAlertLamp, CriticalAlertModal } from '@/components/features/threats';
 import { DraftPanel } from '@/components/features/drafts';
 import { Card, Button, Spinner } from '@/components/ui';
 import { CheckCircle, X } from 'lucide-react';
@@ -34,6 +34,181 @@ export default function HomePage() {
     refreshInterval: 60000,
     autoRefresh: true,
   });
+
+  const {
+    hasUnacknowledgedCritical,
+    criticalThreats,
+    acknowledge,
+  } = useCriticalAlert(threats);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const beepContextRef = useRef<{ context: AudioContext; gain: GainNode; oscillator: OscillatorNode } | null>(null);
+  const sirenIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const notificationShownRef = useRef(false);
+
+  const alertSoundSetting = process.env.NEXT_PUBLIC_CRITICAL_ALERT_SOUND ?? '/sounds/alert.mp3';
+
+  // Play looping alert sound when critical is unacknowledged; stop when acknowledged
+  useEffect(() => {
+    if (!hasUnacknowledgedCritical) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+      if (beepContextRef.current) {
+        try {
+          beepContextRef.current.gain.gain.setValueAtTime(0, beepContextRef.current.context.currentTime);
+          beepContextRef.current.oscillator.stop();
+        } catch {
+          // already stopped
+        }
+        beepContextRef.current = null;
+      }
+      if (sirenIntervalRef.current) {
+        clearInterval(sirenIntervalRef.current);
+        sirenIntervalRef.current = null;
+      }
+      notificationShownRef.current = false;
+      return;
+    }
+
+    const playBeep = () => {
+      if (typeof window === 'undefined') return;
+      try {
+        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        const gain = ctx.createGain();
+        gain.gain.value = 0.15;
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        beepContextRef.current = { context: ctx, gain, oscillator: osc };
+        const repeat = () => {
+          const current = beepContextRef.current;
+          if (!current) return;
+          try {
+            current.oscillator.stop(current.context.currentTime + 0.3);
+            current.oscillator.disconnect();
+          } catch {
+            // already stopped
+          }
+          const osc2 = ctx.createOscillator();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(880, ctx.currentTime);
+          osc2.connect(gain);
+          gain.connect(ctx.destination);
+          osc2.start(ctx.currentTime);
+          beepContextRef.current = { context: ctx, gain, oscillator: osc2 };
+          setTimeout(() => {
+            if (beepContextRef.current?.context.state === 'running') repeat();
+          }, 400);
+        };
+        setTimeout(repeat, 400);
+      } catch {
+        // ignore
+      }
+    };
+
+    const playSiren = () => {
+      if (typeof window === 'undefined') return;
+      try {
+        const ctx = new (window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext)();
+        const gain = ctx.createGain();
+        gain.gain.value = 0.12;
+        const osc = ctx.createOscillator();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, ctx.currentTime);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(ctx.currentTime);
+        beepContextRef.current = { context: ctx, gain, oscillator: osc };
+        let freq = 600;
+        let rising = true;
+        sirenIntervalRef.current = setInterval(() => {
+          if (!beepContextRef.current) return;
+          const current = beepContextRef.current;
+          try {
+            current.oscillator.stop(current.context.currentTime + 0.25);
+            current.oscillator.disconnect();
+          } catch {
+            // already stopped
+          }
+          freq = rising ? freq + 100 : freq - 100;
+          if (freq >= 1200) rising = false;
+          if (freq <= 600) rising = true;
+          const osc2 = ctx.createOscillator();
+          osc2.type = 'sine';
+          osc2.frequency.setValueAtTime(freq, ctx.currentTime);
+          osc2.connect(gain);
+          gain.connect(ctx.destination);
+          osc2.start(ctx.currentTime);
+          beepContextRef.current = { context: ctx, gain, oscillator: osc2 };
+        }, 250);
+      } catch {
+        // ignore
+      }
+    };
+
+    const playFile = (src: string) => {
+      const audio = new Audio(src);
+      audio.loop = true;
+      audioRef.current = audio;
+      audio.play().catch(() => {
+        if (alertSoundSetting === 'builtin:siren') playSiren();
+        else playBeep();
+      });
+    };
+
+    if (alertSoundSetting === 'builtin:siren') {
+      playSiren();
+    } else if (alertSoundSetting === 'builtin:beep') {
+      playBeep();
+    } else {
+      playFile(alertSoundSetting);
+    }
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+        audioRef.current = null;
+      }
+      if (sirenIntervalRef.current) {
+        clearInterval(sirenIntervalRef.current);
+        sirenIntervalRef.current = null;
+      }
+    };
+  }, [hasUnacknowledgedCritical, alertSoundSetting]);
+
+  // One-shot browser notification when critical appears
+  useEffect(() => {
+    if (!hasUnacknowledgedCritical || notificationShownRef.current || typeof window === 'undefined' || !('Notification' in window)) return;
+    if (Notification.permission === 'granted') {
+      try {
+        new Notification('Hyper Watch: Critical threat', {
+          body: 'One or more critical threats detected. Check the dashboard.',
+        });
+        notificationShownRef.current = true;
+      } catch {
+        // ignore
+      }
+    } else if (Notification.permission === 'default') {
+      Notification.requestPermission().then((p) => {
+        if (p === 'granted') {
+          try {
+            new Notification('Hyper Watch: Critical threat', {
+              body: 'One or more critical threats detected. Check the dashboard.',
+            });
+            notificationShownRef.current = true;
+          } catch {
+            // ignore
+          }
+        }
+      });
+    }
+  }, [hasUnacknowledgedCritical]);
 
   const handleThreatSelect = useCallback((threat: Threat) => {
     setSelectedThreat(threat);
@@ -136,6 +311,7 @@ export default function HomePage() {
         onSimulateThreat={handleSimulateThreat}
         isRefreshing={isLoading}
         lastUpdated={lastUpdated || undefined}
+        criticalAlertActive={hasUnacknowledgedCritical}
       />
 
       {/* Main Content */}
@@ -228,6 +404,18 @@ export default function HomePage() {
           </Card>
         </div>
       )}
+
+      {/* Full-screen red overlay when critical threat is unacknowledged */}
+      {hasUnacknowledgedCritical && (
+        <div className="fixed inset-0 bg-red-600/40 z-[999]" aria-hidden />
+      )}
+
+      {/* Critical Alert Modal */}
+      <CriticalAlertModal
+        open={hasUnacknowledgedCritical}
+        criticalThreats={criticalThreats}
+        onAcknowledge={acknowledge}
+      />
 
       {/* Error Toast */}
       {error && (
