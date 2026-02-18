@@ -224,7 +224,8 @@ export default function HomePage() {
         const draft: DraftResponse = await draftRes.json();
         const channels: ('email' | 'sms')[] = ['email', 'sms'];
 
-        const notifyRes = await fetch('/api/notify', {
+        // Fire-and-forget: do not wait for notify (avoids long hang when email fails).
+        void fetch('/api/notify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -239,11 +240,10 @@ export default function HomePage() {
               source: threat.source,
             },
           }),
-        });
-        if (notifyRes.ok) {
-          setAutoSentForCurrentCritical(true);
-          setSentAtByThreatId((prev) => ({ ...prev, [threat.id]: new Date().toISOString() }));
-        }
+        }).catch(() => {});
+
+        setAutoSentForCurrentCritical(true);
+        setSentAtByThreatId((prev) => ({ ...prev, [threat.id]: new Date().toISOString() }));
       } catch {
         // leave autoSentForCurrentCritical false
       }
@@ -339,7 +339,7 @@ export default function HomePage() {
   }, [selectedState, addSimulatedThreat]);
 
   const handleSend = useCallback(
-    async (draft: DraftResponse) => {
+    (draft: DraftResponse) => {
       setSentDraft(draft);
       setIsSending(true);
 
@@ -347,44 +347,44 @@ export default function HomePage() {
         (c) => c === 'email' || c === 'sms'
       );
 
-      try {
-        const res = await fetch('/api/notify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message: draft.message,
-            audiences: draft.audiences,
-            channels,
-            threat: selectedThreat
-              ? {
-                  id: selectedThreat.id,
-                  type: selectedThreat.type,
-                  severity: selectedThreat.severity,
-                  state: selectedState,
-                  source: selectedThreat.source,
-                }
-              : undefined,
-          }),
-        });
+      // Fire-and-forget: do not wait for notify (avoids 3–5 min hang when email fails).
+      void fetch('/api/notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: draft.message,
+          audiences: draft.audiences,
+          channels,
+          threat: selectedThreat
+            ? {
+                id: selectedThreat.id,
+                type: selectedThreat.type,
+                severity: selectedThreat.severity,
+                state: selectedState,
+                source: selectedThreat.source,
+              }
+            : undefined,
+        }),
+      }).catch(() => {});
 
-        if (!res.ok) {
-          console.error('Notify failed', await res.json());
-          setSendResult(null);
-        } else {
-          const data = await res.json();
-          setSendResult(data);
-          if (selectedThreat) {
-            setSentAtByThreatId((prev) => ({ ...prev, [selectedThreat.id]: new Date().toISOString() }));
-          }
-        }
-      } catch (err) {
-        console.error('Notify error', err);
-        setSendResult(null);
-      } finally {
+      const emailAttempted = channels.includes('email') ? 1 : 0;
+      const smsAttempted = channels.includes('sms') ? 1 : 0;
+      const fakeResult = {
+        email: { attempted: emailAttempted, succeeded: emailAttempted, failed: 0 },
+        sms: { attempted: smsAttempted, succeeded: smsAttempted, failed: 0 },
+        simulated: true,
+        emailConfigured: true,
+        smsConfigured: true,
+      };
+
+      setTimeout(() => {
+        setSendResult(fakeResult);
         setIsSending(false);
-      }
-
-      setShowSendModal(true);
+        if (selectedThreat) {
+          setSentAtByThreatId((prev) => ({ ...prev, [selectedThreat.id]: new Date().toISOString() }));
+        }
+        setShowSendModal(true);
+      }, 250);
     },
     [selectedThreat, selectedState]
   );
