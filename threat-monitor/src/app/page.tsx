@@ -5,7 +5,7 @@ import type { Threat, DraftResponse, Severity } from '@/lib/types';
 import { STATE_CENTERS } from '@/lib/types';
 import { useThreats, useCriticalAlert } from '@/lib/hooks';
 import { Header } from '@/components/features/layout';
-import { ThreatMap, ThreatList, CriticalAlertLamp, CriticalAlertModal } from '@/components/features/threats';
+import { ThreatMap, ThreatList, CriticalAlertLamp, CriticalAlertModal, ThreatDetailsModal } from '@/components/features/threats';
 import { DraftPanel } from '@/components/features/drafts';
 import { Card, Button, Spinner } from '@/components/ui';
 import { CheckCircle, X } from 'lucide-react';
@@ -25,6 +25,9 @@ export default function HomePage() {
   const [isSending, setIsSending] = useState(false);
   const [autoSmartAgentOn, setAutoSmartAgentOn] = useState(false);
   const [autoSentForCurrentCritical, setAutoSentForCurrentCritical] = useState(false);
+  const [seenAtByThreatId, setSeenAtByThreatId] = useState<Record<string, string>>({});
+  const [sentAtByThreatId, setSentAtByThreatId] = useState<Record<string, string>>({});
+  const [threatForDetailsModal, setThreatForDetailsModal] = useState<Threat | null>(null);
 
   const {
     threats,
@@ -239,6 +242,7 @@ export default function HomePage() {
         });
         if (notifyRes.ok) {
           setAutoSentForCurrentCritical(true);
+          setSentAtByThreatId((prev) => ({ ...prev, [threat.id]: new Date().toISOString() }));
         }
       } catch {
         // leave autoSentForCurrentCritical false
@@ -276,9 +280,30 @@ export default function HomePage() {
     }
   }, [hasUnacknowledgedCritical]);
 
+  const handleOpenDetails = useCallback((threat: Threat) => {
+    setThreatForDetailsModal(threat);
+    setSeenAtByThreatId((prev) => ({
+      ...prev,
+      [threat.id]: new Date().toISOString(),
+    }));
+  }, []);
+
   const handleThreatSelect = useCallback((threat: Threat) => {
     setSelectedThreat(threat);
+    setSeenAtByThreatId((prev) => ({
+      ...prev,
+      [threat.id]: new Date().toISOString(),
+    }));
   }, []);
+
+  useEffect(() => {
+    if (selectedThreat?.id) {
+      setSeenAtByThreatId((prev) => ({
+        ...prev,
+        [selectedThreat.id]: new Date().toISOString(),
+      }));
+    }
+  }, [selectedThreat?.id]);
 
   const handleSimulateThreat = useCallback(() => {
     const center = STATE_CENTERS[selectedState] || { lat: 37.7749, lng: -122.4194 };
@@ -348,6 +373,9 @@ export default function HomePage() {
         } else {
           const data = await res.json();
           setSendResult(data);
+          if (selectedThreat) {
+            setSentAtByThreatId((prev) => ({ ...prev, [selectedThreat.id]: new Date().toISOString() }));
+          }
         }
       } catch (err) {
         console.error('Notify error', err);
@@ -391,7 +419,10 @@ export default function HomePage() {
               threats={threats}
               selectedThreat={selectedThreat}
               onThreatSelect={handleThreatSelect}
+              onOpenDetails={handleOpenDetails}
               isLoading={isLoading}
+              seenAtByThreatId={seenAtByThreatId}
+              sentAtByThreatId={sentAtByThreatId}
             />
           </div>
 
@@ -402,6 +433,8 @@ export default function HomePage() {
               selectedState={selectedState}
               selectedThreat={selectedThreat}
               onThreatSelect={handleThreatSelect}
+              onOpenDetails={handleOpenDetails}
+              sentAtByThreatId={sentAtByThreatId}
             />
           </div>
 
@@ -489,6 +522,14 @@ export default function HomePage() {
         criticalThreats={criticalThreats}
         onAcknowledge={acknowledge}
         autoSent={autoSentForCurrentCritical}
+      />
+
+      {/* Threat Details Modal */}
+      <ThreatDetailsModal
+        open={!!threatForDetailsModal}
+        threat={threatForDetailsModal}
+        onClose={() => setThreatForDetailsModal(null)}
+        sentAt={threatForDetailsModal ? sentAtByThreatId[threatForDetailsModal.id] : undefined}
       />
 
       {/* Error Toast */}

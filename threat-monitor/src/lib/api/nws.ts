@@ -55,6 +55,9 @@ function normalizeNWSAlert(alert: NWSAlert): Threat {
     polygon = coords[0]?.map(([lng, lat]) => [lat, lng] as [number, number]);
   }
 
+  // Use the human-readable NWS alerts page; the API URL (alert.id) returns raw JSON.
+  const detailsUrl = 'https://www.weather.gov/alerts';
+
   return {
     id: props.id || alert.id,
     source: 'nws',
@@ -70,6 +73,7 @@ function normalizeNWSAlert(alert: NWSAlert): Threat {
     },
     startTime: props.effective,
     endTime: props.expires,
+    detailsUrl,
     raw: alert,
   };
 }

@@ -9,12 +9,17 @@ import {
   Wind,
   MapPin,
   Clock,
+  ExternalLink,
 } from 'lucide-react';
 
 interface ThreatCardProps {
   threat: Threat;
   isSelected?: boolean;
   onClick?: () => void;
+  onMoreDetailsClick?: (threat: Threat) => void;
+  lastSeenAt?: string;
+  isSeen?: boolean;
+  sentAt?: string;
 }
 
 const sourceIcons = {
@@ -29,7 +34,7 @@ const sourceLabels = {
   airquality: 'Air',
 };
 
-export function ThreatCard({ threat, isSelected, onClick }: ThreatCardProps) {
+export function ThreatCard({ threat, isSelected, onClick, onMoreDetailsClick, lastSeenAt, isSeen, sentAt }: ThreatCardProps) {
   const SourceIcon = sourceIcons[threat.source];
 
   return (
@@ -59,13 +64,28 @@ export function ThreatCard({ threat, isSelected, onClick }: ThreatCardProps) {
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Header with badges */}
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex items-center gap-2 mb-1 flex-wrap">
             <Badge variant="severity" severity={threat.severity} size="sm">
               {threat.severity}
             </Badge>
             <span className="text-xs text-gray-500">
               {sourceLabels[threat.source]}
             </span>
+            <span
+              className={cn(
+                'text-xs px-1.5 py-0.5 rounded font-medium',
+                threat.id.startsWith('sim-')
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-gray-100 text-gray-600'
+              )}
+            >
+              {threat.id.startsWith('sim-') ? 'Simulated' : 'Live'}
+            </span>
+            {sentAt && (
+              <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-green-100 text-green-800">
+                Sent {formatRelativeTime(sentAt)}
+              </span>
+            )}
           </div>
 
           {/* Title */}
@@ -80,11 +100,16 @@ export function ThreatCard({ threat, isSelected, onClick }: ThreatCardProps) {
           </div>
 
           {/* Meta info */}
-          <div className="flex items-center gap-3 text-xs text-gray-500">
+          <div className="flex items-center gap-3 text-xs text-gray-500 flex-wrap">
             <span className="flex items-center gap-1">
               <Clock className="w-3 h-3" />
               {formatRelativeTime(threat.startTime)}
             </span>
+            {isSeen && lastSeenAt && (
+              <span className="text-gray-500">
+                Last seen: {formatRelativeTime(lastSeenAt)}
+              </span>
+            )}
 
             {/* Show magnitude for earthquakes */}
             {threat.magnitude && (
@@ -100,6 +125,30 @@ export function ThreatCard({ threat, isSelected, onClick }: ThreatCardProps) {
               </span>
             )}
           </div>
+          {onMoreDetailsClick ? (
+            <button
+              type="button"
+              className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                onMoreDetailsClick(threat);
+              }}
+            >
+              <ExternalLink className="w-3 h-3" />
+              More details
+            </button>
+          ) : threat.detailsUrl ? (
+            <a
+              href={threat.detailsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-2 inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <ExternalLink className="w-3 h-3" />
+              More details
+            </a>
+          ) : null}
         </div>
       </div>
     </Card>

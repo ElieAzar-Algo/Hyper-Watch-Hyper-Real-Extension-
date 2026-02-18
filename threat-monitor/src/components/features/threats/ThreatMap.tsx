@@ -7,6 +7,7 @@ import type { Threat, Severity } from '@/lib/types';
 import { STATE_CENTERS } from '@/lib/types';
 import { Badge } from '@/components/ui';
 import { formatRelativeTime } from '@/lib/utils';
+import { ExternalLink } from 'lucide-react';
 
 // Fix Leaflet default marker icon issue in Next.js
 import 'leaflet/dist/leaflet.css';
@@ -86,6 +87,8 @@ interface ThreatMapProps {
   selectedState: string;
   selectedThreat: Threat | null;
   onThreatSelect: (threat: Threat) => void;
+  onOpenDetails?: (threat: Threat) => void;
+  sentAtByThreatId?: Record<string, string>;
 }
 
 // Component to recenter map when state changes or threat is selected
@@ -111,6 +114,8 @@ export function ThreatMap({
   selectedState,
   selectedThreat,
   onThreatSelect,
+  onOpenDetails,
+  sentAtByThreatId = {},
 }: ThreatMapProps) {
   const center = STATE_CENTERS[selectedState] || { lat: 39.8283, lng: -98.5795, zoom: 4 };
 
@@ -166,19 +171,56 @@ export function ThreatMap({
         >
           <Popup>
             <div className="p-1 min-w-[200px]">
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <Badge variant="severity" severity={threat.severity} size="sm">
                   {threat.severity}
                 </Badge>
                 <Badge variant="source" source={threat.source} size="sm">
                   {threat.source}
                 </Badge>
+                <span
+                  className={
+                    threat.id.startsWith('sim-')
+                      ? 'text-xs px-1.5 py-0.5 rounded font-medium bg-amber-100 text-amber-800'
+                      : 'text-xs px-1.5 py-0.5 rounded font-medium bg-gray-100 text-gray-600'
+                  }
+                >
+                  {threat.id.startsWith('sim-') ? 'Simulated' : 'Live'}
+                </span>
+                {sentAtByThreatId[threat.id] && (
+                  <span className="text-xs px-1.5 py-0.5 rounded font-medium bg-green-100 text-green-800">
+                    Alert sent
+                  </span>
+                )}
               </div>
               <h3 className="font-semibold text-sm mb-1">{threat.title}</h3>
               <p className="text-xs text-gray-600 mb-1">{threat.location.areaDesc}</p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 mb-2">
                 {formatRelativeTime(threat.startTime)}
               </p>
+              {onOpenDetails ? (
+                <button
+                  type="button"
+                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    onOpenDetails(threat);
+                  }}
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  More details
+                </button>
+              ) : threat.detailsUrl ? (
+                <a
+                  href={threat.detailsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:underline"
+                >
+                  <ExternalLink className="w-3 h-3" />
+                  More details
+                </a>
+              ) : null}
             </div>
           </Popup>
         </Marker>

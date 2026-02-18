@@ -46,11 +46,9 @@ For audience segments, consider:
 - Special needs (hearing impaired, mobility limited)
 - Business categories (restaurants, retail, industrial)
 
-For channel recommendations:
+For channel recommendations (only SMS and Email are supported):
 - SMS: Urgent, time-sensitive alerts
-- Voice: Critical alerts, elderly population
-- Email: Non-urgent updates, detailed information
-- App: Push notifications, ongoing updates`;
+- Email: Non-urgent updates, detailed information`;
 
 /**
  * Generate an alert message draft for a given threat

@@ -11,7 +11,10 @@ interface ThreatListProps {
   threats: Threat[];
   selectedThreat: Threat | null;
   onThreatSelect: (threat: Threat) => void;
+  onOpenDetails?: (threat: Threat) => void;
   isLoading?: boolean;
+  seenAtByThreatId?: Record<string, string>;
+  sentAtByThreatId?: Record<string, string>;
 }
 
 const severities: Severity[] = ['critical', 'warning', 'watch', 'advisory'];
@@ -27,7 +30,10 @@ export function ThreatList({
   threats,
   selectedThreat,
   onThreatSelect,
+  onOpenDetails,
   isLoading,
+  seenAtByThreatId = {},
+  sentAtByThreatId = {},
 }: ThreatListProps) {
   const [showFilters, setShowFilters] = useState(false);
   const [activeSeverities, setActiveSeverities] = useState<Severity[]>([]);
@@ -173,6 +179,10 @@ export function ThreatList({
               threat={threat}
               isSelected={selectedThreat?.id === threat.id}
               onClick={() => onThreatSelect(threat)}
+              onMoreDetailsClick={onOpenDetails}
+              lastSeenAt={seenAtByThreatId[threat.id]}
+              isSeen={!!seenAtByThreatId[threat.id]}
+              sentAt={sentAtByThreatId[threat.id]}
             />
           ))
         )}

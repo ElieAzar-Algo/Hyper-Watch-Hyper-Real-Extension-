@@ -39,6 +39,7 @@ function normalizeUSGSEarthquake(earthquake: USGSEarthquake): Threat {
     },
     startTime: new Date(props.time).toISOString(),
     magnitude: props.mag,
+    detailsUrl: props.url || props.detail,
     raw: earthquake,
   };
 }
