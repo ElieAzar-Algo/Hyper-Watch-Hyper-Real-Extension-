@@ -34,6 +34,8 @@ Railway (Railpack) must build the app in `threat-monitor/`. You can do either of
 
 2. **Build from repo root:** The repository root contains a `package.json` that delegates `install`, `build`, and `start` to `threat-monitor/`. If you do not set Root Directory, Railpack will see this file, detect Node, and run `npm install` / `npm run build` / `npm run start` at root; those scripts install and run the app from `threat-monitor/`, so the deploy still works.
 
+The app sets DNS to prefer IPv4 at startup so SMTP and Twilio work from cloud runtimes (e.g. Railway) where IPv6 may be unreachable.
+
 ---
 
 ## Deployment process (high level)
