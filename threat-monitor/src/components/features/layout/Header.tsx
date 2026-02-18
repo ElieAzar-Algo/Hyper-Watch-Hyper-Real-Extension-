@@ -2,6 +2,7 @@
 
 import { Select, Button } from '@/components/ui';
 import { US_STATES } from '@/lib/types';
+import { CriticalAlertLamp } from '@/components/features/threats';
 import Link from 'next/link';
 import { Radio, RefreshCw, AlertTriangle, ArrowLeft } from 'lucide-react';
 
@@ -13,6 +14,7 @@ interface HeaderProps {
   onSimulateThreat?: () => void;
   isRefreshing?: boolean;
   lastUpdated?: string;
+  criticalAlertActive?: boolean;
 }
 
 export function Header({
@@ -23,6 +25,7 @@ export function Header({
   onSimulateThreat,
   isRefreshing,
   lastUpdated,
+  criticalAlertActive = false,
 }: HeaderProps) {
   const logoBlock = (
     <div className="flex items-center gap-3">
@@ -107,6 +110,8 @@ export function Header({
                   Simulate Threat
                 </Button>
               )}
+
+              <CriticalAlertLamp active={criticalAlertActive} />
 
               {lastUpdated && (
                 <span className="text-xs text-gray-500">
