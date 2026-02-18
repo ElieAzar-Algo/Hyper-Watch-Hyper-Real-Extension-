@@ -73,6 +73,18 @@ TWILIO_FROM_NUMBER=
 
 Without an OpenAI API key, the app will use intelligent default messages based on threat type and severity. Without an AirNow API key, air quality alerts are omitted. Without SMTP/Twilio settings, staff notifications are simulated and logged only.
 
+Copy from `.env.local.example` for a full list of variables. For **critical alert sound** in production, set `NEXT_PUBLIC_CRITICAL_ALERT_SOUND=builtin:beep` or `builtin:siren` if you do not add an MP3 under `public/sounds/`.
+
+### Deploying (POC)
+
+To deploy to a free host (e.g. Vercel) for a demo:
+
+1. Set the host's **Root Directory** to `threat-monitor`.
+2. Add environment variables in the host's dashboard (see [DEPLOYMENT.md](../docs/DEPLOYMENT.md)).
+3. For reliable alert sound without adding files, set `NEXT_PUBLIC_CRITICAL_ALERT_SOUND=builtin:beep` or `builtin:siren`.
+
+Full steps, config table, and sound options: **[docs/DEPLOYMENT.md](../docs/DEPLOYMENT.md)**.
+
 ## Demo Script
 
 1. **Show the Dashboard**: Open the app and select a state (e.g., California or Texas)
