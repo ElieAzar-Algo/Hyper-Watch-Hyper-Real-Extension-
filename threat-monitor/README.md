@@ -21,7 +21,7 @@ A web dashboard that transforms Hyper-Reach from a reactive notification tool in
 
 - **Demo-Ready Features**:
   - "Simulate Threat" button for reliable demos
-  - Mock "Send to Hyper-Reach" flow
+  - "Send to Hyper Watch" can dispatch real email/SMS to configured Hyper-Reach staff
   - State selector for regional filtering
 
 ## Quick Start
@@ -57,9 +57,21 @@ OPENAI_API_KEY=sk-your-openai-api-key-here
 
 # Optional - enables air quality alerts (free key at https://www.airnowapi.org/)
 AIRNOW_API_KEY=
+
+# Optional - enables staff email notifications (SMTP)
+EMAIL_FROM=hyperwatch-demo@example.com
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+
+# Optional - enables staff SMS notifications (Twilio)
+TWILIO_ACCOUNT_SID=
+TWILIO_AUTH_TOKEN=
+TWILIO_FROM_NUMBER=
 ```
 
-Without an OpenAI API key, the app will use intelligent default messages based on threat type and severity. Without an AirNow API key, air quality alerts are omitted.
+Without an OpenAI API key, the app will use intelligent default messages based on threat type and severity. Without an AirNow API key, air quality alerts are omitted. Without SMTP/Twilio settings, staff notifications are simulated and logged only.
 
 ## Demo Script
 
@@ -69,7 +81,7 @@ Without an OpenAI API key, the app will use intelligent default messages based o
 4. **AI Drafting**: Watch the AI generate a notification message automatically
 5. **Customize**: Edit the message, select audience segments and channels
 6. **Simulate**: Use the "Simulate Threat" button to inject controlled test data
-7. **Send**: Click "Send to Hyper-Reach" to see the mock send flow
+7. **Send**: Click "Send to Hyper Watch" to notify internal Hyper-Reach staff (email/SMS if configured)
 
 ## Project Structure
 

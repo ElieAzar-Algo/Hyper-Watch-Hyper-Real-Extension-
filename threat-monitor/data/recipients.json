@@ -1,0 +1,20 @@
+[
+  {
+    "id": "demo-1",
+    "fullName": "Adam Azar",
+    "email": "elias.azar@dcsorg.com",
+    "phone": "+18286902579",
+    "role": "Dispatcher",
+    "category": "Public Safety",
+    "isActive": true
+  },
+  {
+    "id": "52c89517-5d7e-48b4-8e6a-1eb4e9491aac",
+    "fullName": "Elias Al Azar",
+    "email": "elie.azar3891.ea@gmail.com",
+    "phone": "+18286902576",
+    "role": "Emergency Manager",
+    "category": "Public Safety",
+    "isActive": true
+  }
+]

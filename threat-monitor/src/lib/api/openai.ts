@@ -77,7 +77,7 @@ Severity: ${threat.severity.toUpperCase()}
 Location: ${threat.location.areaDesc}
 Description: ${threat.description}
 ${threat.magnitude ? `Magnitude: ${threat.magnitude}` : ''}
-${threat.affectedCustomers ? `Affected Customers: ${threat.affectedCustomers.toLocaleString()}` : ''}
+${threat.aqi != null ? `AQI: ${threat.aqi}` : ''}
 ${context ? `\nAdditional Context: ${context}` : ''}
 
 Please provide:
@@ -89,7 +89,7 @@ Format your response as JSON:
 {
   "message": "Your alert message here",
   "audiences": ["Segment 1", "Segment 2", "Segment 3"],
-  "channels": ["sms", "voice", "email", "app"]
+  "channels": ["sms", "email"]
 }`;
 
   try {
@@ -136,7 +136,7 @@ Format your response as JSON:
 function validateChannels(channels: unknown): Channel[] | null {
   if (!Array.isArray(channels)) return null;
   
-  const validChannels: Channel[] = ['sms', 'voice', 'email', 'app'];
+  const validChannels: Channel[] = ['sms', 'email'];
   const filtered = channels.filter((c): c is Channel => 
     validChannels.includes(c as Channel)
   );
@@ -204,13 +204,13 @@ function getDefaultAudiences(threat: Threat): string[] {
 function getDefaultChannels(threat: Threat): Channel[] {
   switch (threat.severity) {
     case 'critical':
-      return ['sms', 'voice', 'app', 'email'];
+      return ['sms', 'email'];
     case 'warning':
-      return ['sms', 'app', 'email'];
+      return ['sms', 'email'];
     case 'watch':
-      return ['app', 'email', 'sms'];
+      return ['email', 'sms'];
     case 'advisory':
-      return ['email', 'app'];
+      return ['email'];
     default:
       return ['sms', 'email'];
   }

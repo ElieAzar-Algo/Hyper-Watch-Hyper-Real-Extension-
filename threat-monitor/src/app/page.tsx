@@ -7,7 +7,7 @@ import { useThreats } from '@/lib/hooks';
 import { Header } from '@/components/features/layout';
 import { ThreatMap, ThreatList } from '@/components/features/threats';
 import { DraftPanel } from '@/components/features/drafts';
-import { Card, Button } from '@/components/ui';
+import { Card, Button, Spinner } from '@/components/ui';
 import { CheckCircle, X } from 'lucide-react';
 
 export default function HomePage() {
@@ -15,6 +15,12 @@ export default function HomePage() {
   const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null);
   const [showSendModal, setShowSendModal] = useState(false);
   const [sentDraft, setSentDraft] = useState<DraftResponse | null>(null);
+  const [sendResult, setSendResult] = useState<{
+    email: { attempted: number; succeeded: number; failed: number };
+    sms: { attempted: number; succeeded: number; failed: number };
+    simulated: boolean;
+  } | null>(null);
+  const [isSending, setIsSending] = useState(false);
 
   const {
     threats,
@@ -66,14 +72,58 @@ export default function HomePage() {
     setSelectedThreat(simulatedThreat);
   }, [selectedState, addSimulatedThreat]);
 
-  const handleSend = useCallback((draft: DraftResponse) => {
-    setSentDraft(draft);
-    setShowSendModal(true);
-  }, []);
+  const handleSend = useCallback(
+    async (draft: DraftResponse) => {
+      setSentDraft(draft);
+      setIsSending(true);
+
+      const channels = draft.channels.filter(
+        (c) => c === 'email' || c === 'sms'
+      );
+
+      try {
+        const res = await fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: draft.message,
+            audiences: draft.audiences,
+            channels,
+            threat: selectedThreat
+              ? {
+                  id: selectedThreat.id,
+                  type: selectedThreat.type,
+                  severity: selectedThreat.severity,
+                  state: selectedState,
+                  source: selectedThreat.source,
+                }
+              : undefined,
+          }),
+        });
+
+        if (!res.ok) {
+          console.error('Notify failed', await res.json());
+          setSendResult(null);
+        } else {
+          const data = await res.json();
+          setSendResult(data);
+        }
+      } catch (err) {
+        console.error('Notify error', err);
+        setSendResult(null);
+      } finally {
+        setIsSending(false);
+      }
+
+      setShowSendModal(true);
+    },
+    [selectedThreat, selectedState]
+  );
 
   const closeSendModal = useCallback(() => {
     setShowSendModal(false);
     setSentDraft(null);
+    setSendResult(null);
   }, []);
 
   return (
@@ -118,20 +168,36 @@ export default function HomePage() {
         </div>
       </main>
 
+      {/* Sending overlay */}
+      {isSending && (
+        <div className="fixed inset-0 bg-black/50 flex flex-col items-center justify-center z-[1000]">
+          <Spinner size="lg" className="text-white" />
+          <p className="mt-3 text-sm text-white font-medium">Sending...</p>
+        </div>
+      )}
+
       {/* Send Confirmation Modal */}
       {showSendModal && sentDraft && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
           <Card className="w-full max-w-md mx-4 animate-fade-in" padding="lg">
             <div className="text-center">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-green-600" />
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-2">
-                Alert Sent to Hyper Watch!
+                Alert Sent to Hyper Watch Staff
               </h2>
               <p className="text-gray-600 mb-6">
-                Your alert has been queued for delivery to {sentDraft.audiences.length} audience segments
-                via {sentDraft.channels.length} channels.
+                Your alert has been processed for internal Hyper Watch staff.
+                {sendResult && (
+                  <>
+                    {' '}
+                    Emails attempted: {sendResult.email.attempted}, succeeded:{' '}
+                    {sendResult.email.succeeded}. SMS attempted:{' '}
+                    {sendResult.sms.attempted}, succeeded:{' '}
+                    {sendResult.sms.succeeded}.
+                  </>
+                )}
               </p>
 
               <div className="bg-gray-50 rounded-lg p-4 mb-6 text-left">
@@ -154,7 +220,9 @@ export default function HomePage() {
               </Button>
 
               <p className="text-xs text-gray-400 mt-4">
-                This is a demo. In production, this would trigger actual Hyper Watch notifications.
+                {sendResult?.simulated
+                  ? 'No email/SMS providers configured. Notifications were simulated (logged only).'
+                  : 'Notifications were dispatched via configured email/SMS providers.'}
               </p>
             </div>
           </Card>

@@ -10,9 +10,7 @@ import {
   Copy,
   Check,
   MessageSquare,
-  Phone,
   Mail,
-  Smartphone,
   Users,
   RefreshCw,
 } from 'lucide-react';
@@ -24,16 +22,12 @@ interface DraftPanelProps {
 
 const channelIcons: Record<Channel, typeof MessageSquare> = {
   sms: MessageSquare,
-  voice: Phone,
   email: Mail,
-  app: Smartphone,
 };
 
 const channelLabels: Record<Channel, string> = {
   sms: 'SMS',
-  voice: 'Voice Call',
   email: 'Email',
-  app: 'Mobile App',
 };
 
 export function DraftPanel({ threat, onSend }: DraftPanelProps) {
@@ -242,7 +236,7 @@ export function DraftPanel({ threat, onSend }: DraftPanelProps) {
                 Notification Channels
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {(['sms', 'voice', 'email', 'app'] as Channel[]).map((channel) => {
+                {(['sms', 'email'] as Channel[]).map((channel) => {
                   const Icon = channelIcons[channel];
                   const isSelected = selectedChannels.includes(channel);
 
