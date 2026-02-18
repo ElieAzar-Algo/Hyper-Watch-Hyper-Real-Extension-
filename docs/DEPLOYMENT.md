@@ -26,6 +26,10 @@ This guide describes how to deploy the Real-Time Threat Monitor (Hyper Watch) to
 
 **Alternatives:** Render (free Web Service), Railway (free tier with limits). Both support Next.js and env vars; you set root to `threat-monitor` and build command `npm run build`, start `npm run start` (or their Next.js preset).
 
+### Railway
+
+When deploying on Railway, set the service **Root Directory** to `threat-monitor` in the service Settings. Otherwise Railpack analyzes the repo root (which has no `package.json`) and cannot determine how to build. With the root directory set, the build runs from the app folder and Node/Next.js is detected.
+
 ---
 
 ## Deployment process (high level)
