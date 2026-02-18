@@ -1,3 +1,4 @@
+import dns from 'node:dns';
 import nodemailer from 'nodemailer';
 import type { Recipient } from '@/lib/recipients/types';
 
@@ -14,7 +15,8 @@ export interface NotifyContext {
   };
 }
 
-function getTransport() {
+/** Resolve SMTP host to IPv4 and create transport so SMTP works from runtimes (e.g. Railway) where IPv6 is unreachable. */
+async function getTransport(): Promise<ReturnType<typeof nodemailer.createTransport> | null> {
   const host = process.env.SMTP_HOST;
   const port = process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : undefined;
   const user = process.env.SMTP_USER;
@@ -24,11 +26,21 @@ function getTransport() {
     return null;
   }
 
+  let resolvedAddress: string;
+  try {
+    const resolved = await dns.promises.lookup(host, { family: 4 });
+    resolvedAddress = resolved.address;
+  } catch (err) {
+    console.warn('[EMAIL] Failed to resolve SMTP host to IPv4:', host, err);
+    return null;
+  }
+
   return nodemailer.createTransport({
-    host,
+    host: resolvedAddress,
     port,
     secure: port === 465,
     auth: { user, pass },
+    tls: { servername: host },
   });
 }
 
@@ -36,7 +48,7 @@ export async function sendEmail(
   recipient: Recipient,
   context: NotifyContext
 ): Promise<boolean> {
-  const transporter = getTransport();
+  const transporter = await getTransport();
   const from = process.env.EMAIL_FROM || 'hyperwatch-demo@example.com';
 
   if (!transporter) {
