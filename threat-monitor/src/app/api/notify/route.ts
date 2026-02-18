@@ -25,6 +25,8 @@ interface NotifyResponse {
   email: { attempted: number; succeeded: number; failed: number };
   sms: { attempted: number; succeeded: number; failed: number };
   simulated: boolean;
+  emailConfigured: boolean;
+  smsConfigured: boolean;
 }
 
 export async function POST(request: NextRequest) {
@@ -121,6 +123,8 @@ export async function POST(request: NextRequest) {
         failed: smsAttempted - smsSucceeded,
       },
       simulated,
+      emailConfigured,
+      smsConfigured,
     };
 
     return NextResponse.json(response);

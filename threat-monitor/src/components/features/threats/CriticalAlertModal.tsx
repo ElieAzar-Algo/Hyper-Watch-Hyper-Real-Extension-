@@ -8,12 +8,14 @@ interface CriticalAlertModalProps {
   open: boolean;
   criticalThreats: Threat[];
   onAcknowledge: () => void;
+  autoSent?: boolean;
 }
 
 export function CriticalAlertModal({
   open,
   criticalThreats,
   onAcknowledge,
+  autoSent = false,
 }: CriticalAlertModalProps) {
   if (!open || criticalThreats.length === 0) return null;
 
@@ -25,12 +27,16 @@ export function CriticalAlertModal({
             <AlertTriangle className="w-8 h-8 text-red-600" />
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Critical threat detected
+            {autoSent
+              ? 'Critical alert sent automatically'
+              : 'Critical threat detected'}
           </h2>
           <p className="text-gray-600 mb-4">
-            {criticalThreats.length === 1
-              ? 'One critical threat requires your attention.'
-              : `${criticalThreats.length} critical threats require your attention.`}
+            {autoSent
+              ? 'The critical alert has been sent to staff automatically by the Auto Smart Agent. Please confirm you\'re aware.'
+              : criticalThreats.length === 1
+                ? 'One critical threat requires your attention.'
+                : `${criticalThreats.length} critical threats require your attention.`}
           </p>
 
           <ul className="bg-gray-50 rounded-lg p-4 mb-6 text-left space-y-2 max-h-48 overflow-y-auto">
@@ -46,7 +52,7 @@ export function CriticalAlertModal({
           </ul>
 
           <Button onClick={onAcknowledge} className="w-full">
-            I&apos;ve seen the alert
+            {autoSent ? "I'm aware" : "I've seen the alert"}
           </Button>
         </div>
       </Card>
