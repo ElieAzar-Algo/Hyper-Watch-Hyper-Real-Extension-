@@ -204,14 +204,14 @@ function getDefaultAudiences(threat: Threat): string[] {
 function getDefaultChannels(threat: Threat): Channel[] {
   switch (threat.severity) {
     case 'critical':
-      return ['sms', 'email'];
+      return ['email', 'sms'];
     case 'warning':
-      return ['sms', 'email'];
+      return ['email', 'sms'];
     case 'watch':
       return ['email', 'sms'];
     case 'advisory':
       return ['email'];
     default:
-      return ['sms', 'email'];
+      return ['email', 'sms'];
   }
 }

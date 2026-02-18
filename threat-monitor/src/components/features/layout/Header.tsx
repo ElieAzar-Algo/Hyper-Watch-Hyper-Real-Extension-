@@ -1,6 +1,6 @@
 'use client';
 
-import { Select, Button } from '@/components/ui';
+import { Select, Button, Switch } from '@/components/ui';
 import { US_STATES } from '@/lib/types';
 import { CriticalAlertLamp } from '@/components/features/threats';
 import Link from 'next/link';
@@ -15,6 +15,8 @@ interface HeaderProps {
   isRefreshing?: boolean;
   lastUpdated?: string;
   criticalAlertActive?: boolean;
+  autoSmartAgentOn?: boolean;
+  onAutoSmartAgentChange?: (on: boolean) => void;
 }
 
 export function Header({
@@ -26,6 +28,8 @@ export function Header({
   isRefreshing,
   lastUpdated,
   criticalAlertActive = false,
+  autoSmartAgentOn = false,
+  onAutoSmartAgentChange,
 }: HeaderProps) {
   const logoBlock = (
     <div className="flex items-center gap-3">
@@ -109,6 +113,16 @@ export function Header({
                   <AlertTriangle className="w-4 h-4 mr-2" />
                   Simulate Threat
                 </Button>
+              )}
+
+              {onAutoSmartAgentChange && (
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <Switch
+                    checked={autoSmartAgentOn}
+                    onCheckedChange={onAutoSmartAgentChange}
+                  />
+                  <span>Auto Smart AI Agent</span>
+                </div>
               )}
 
               <CriticalAlertLamp active={criticalAlertActive} />

@@ -70,7 +70,13 @@ export function DraftPanel({ threat, onSend }: DraftPanelProps) {
       const data = await response.json();
       setDraft(data);
       setEditedMessage(data.message);
-      setSelectedChannels(data.channels);
+      const fromApi = Array.isArray(data.channels)
+        ? data.channels.filter((c: string) => c === 'email' || c === 'sms')
+        : [];
+      const channels = fromApi.length ? fromApi : (['email', 'sms'] as Channel[]);
+      setSelectedChannels(
+        channels.includes('email') ? channels : (['email', ...channels] as Channel[])
+      );
       setSelectedAudiences(data.audiences);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate draft');

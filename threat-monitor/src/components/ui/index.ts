@@ -10,3 +10,4 @@ export {
 } from './Card';
 export { Select } from './Select';
 export { Spinner, LoadingOverlay } from './Spinner';
+export { Switch } from './Switch';

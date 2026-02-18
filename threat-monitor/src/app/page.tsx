@@ -19,8 +19,12 @@ export default function HomePage() {
     email: { attempted: number; succeeded: number; failed: number };
     sms: { attempted: number; succeeded: number; failed: number };
     simulated: boolean;
+    emailConfigured?: boolean;
+    smsConfigured?: boolean;
   } | null>(null);
   const [isSending, setIsSending] = useState(false);
+  const [autoSmartAgentOn, setAutoSmartAgentOn] = useState(false);
+  const [autoSentForCurrentCritical, setAutoSentForCurrentCritical] = useState(false);
 
   const {
     threats,
@@ -45,6 +49,7 @@ export default function HomePage() {
   const beepContextRef = useRef<{ context: AudioContext; gain: GainNode; oscillator: OscillatorNode } | null>(null);
   const sirenIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const notificationShownRef = useRef(false);
+  const autoSendTriggeredRef = useRef(false);
 
   const alertSoundSetting = process.env.NEXT_PUBLIC_CRITICAL_ALERT_SOUND ?? '/sounds/alert.mp3';
 
@@ -182,6 +187,67 @@ export default function HomePage() {
     };
   }, [hasUnacknowledgedCritical, alertSoundSetting]);
 
+  // Reset auto-send state when critical is acknowledged or cleared
+  useEffect(() => {
+    if (!hasUnacknowledgedCritical) {
+      autoSendTriggeredRef.current = false;
+      setAutoSentForCurrentCritical(false);
+    }
+  }, [hasUnacknowledgedCritical]);
+
+  // Auto-send when critical appears and Auto Smart Agent is ON (once per batch)
+  useEffect(() => {
+    if (
+      !hasUnacknowledgedCritical ||
+      !autoSmartAgentOn ||
+      criticalThreats.length === 0 ||
+      autoSendTriggeredRef.current
+    ) {
+      return;
+    }
+
+    autoSendTriggeredRef.current = true;
+    const threat = criticalThreats[0];
+
+    const run = async () => {
+      try {
+        const draftRes = await fetch('/api/draft', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ threat }),
+        });
+        if (!draftRes.ok) return;
+
+        const draft: DraftResponse = await draftRes.json();
+        const channels: ('email' | 'sms')[] = ['email', 'sms'];
+
+        const notifyRes = await fetch('/api/notify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: draft.message,
+            audiences: draft.audiences,
+            channels,
+            threat: {
+              id: threat.id,
+              type: threat.type,
+              severity: threat.severity,
+              state: selectedState,
+              source: threat.source,
+            },
+          }),
+        });
+        if (notifyRes.ok) {
+          setAutoSentForCurrentCritical(true);
+        }
+      } catch {
+        // leave autoSentForCurrentCritical false
+      }
+    };
+
+    void run();
+  }, [hasUnacknowledgedCritical, autoSmartAgentOn, criticalThreats, selectedState]);
+
   // One-shot browser notification when critical appears
   useEffect(() => {
     if (!hasUnacknowledgedCritical || notificationShownRef.current || typeof window === 'undefined' || !('Notification' in window)) return;
@@ -312,6 +378,8 @@ export default function HomePage() {
         isRefreshing={isLoading}
         lastUpdated={lastUpdated || undefined}
         criticalAlertActive={hasUnacknowledgedCritical}
+        autoSmartAgentOn={autoSmartAgentOn}
+        onAutoSmartAgentChange={setAutoSmartAgentOn}
       />
 
       {/* Main Content */}
@@ -395,6 +463,11 @@ export default function HomePage() {
                 Close
               </Button>
 
+              {sendResult && !sendResult.emailConfigured && sentDraft.channels.includes('email') && (
+                <p className="text-xs text-amber-700 mt-2">
+                  Email not sent (SMTP not configured). Add SMTP_* to .env.local to enable email.
+                </p>
+              )}
               <p className="text-xs text-gray-400 mt-4">
                 {sendResult?.simulated
                   ? 'No email/SMS providers configured. Notifications were simulated (logged only).'
@@ -415,6 +488,7 @@ export default function HomePage() {
         open={hasUnacknowledgedCritical}
         criticalThreats={criticalThreats}
         onAcknowledge={acknowledge}
+        autoSent={autoSentForCurrentCritical}
       />
 
       {/* Error Toast */}
