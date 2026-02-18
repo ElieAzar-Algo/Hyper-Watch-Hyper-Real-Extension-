@@ -25,6 +25,7 @@ export interface Threat {
   endTime?: string;
   magnitude?: number; // For earthquakes
   aqi?: number; // For air quality
+  detailsUrl?: string; // External link to official source (NWS, USGS, etc.)
   raw?: unknown;
 }
 

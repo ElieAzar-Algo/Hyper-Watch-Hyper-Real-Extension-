@@ -15,6 +15,15 @@
     "phone": "+18286902576",
     "role": "Emergency Manager",
     "category": "Public Safety",
-    "isActive": true
+    "isActive": false
+  },
+  {
+    "id": "634f54bd-fd6d-4740-b641-59569f65dd29",
+    "fullName": "Roya Raidan",
+    "email": "roya.raidan@claio.ai",
+    "phone": "+18286902579",
+    "role": "Emergency Manager",
+    "category": "Public Safety",
+    "isActive": false
   }
 ]

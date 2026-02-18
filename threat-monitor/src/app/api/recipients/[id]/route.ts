@@ -6,10 +6,10 @@ export const dynamic = 'force-dynamic';
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const body = (await request.json()) as Partial<Recipient>;
 
     const recipients = await getRecipients();
@@ -37,10 +37,10 @@ export async function PUT(
 
 export async function DELETE(
   _request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = params.id;
+    const { id } = await params;
     const recipients = await getRecipients();
     const next = recipients.filter((r) => r.id !== id);
 

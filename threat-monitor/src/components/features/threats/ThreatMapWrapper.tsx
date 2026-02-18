@@ -26,6 +26,8 @@ interface ThreatMapWrapperProps {
   selectedState: string;
   selectedThreat: Threat | null;
   onThreatSelect: (threat: Threat) => void;
+  onOpenDetails?: (threat: Threat) => void;
+  sentAtByThreatId?: Record<string, string>;
 }
 
 export function ThreatMapWrapper(props: ThreatMapWrapperProps) {
